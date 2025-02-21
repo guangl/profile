@@ -1,0 +1,140 @@
+### ENV CONFIG START {{{
+
+export PATH="/opt/homebrew/opt/rustup/bin:$PATH"
+
+### }}} ENV CONFIG END
+
+
+
+### SOFTWARE CONFIG START {{{
+
+# powerlevel10k
+source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# brew config
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# zoxide
+eval "$(zoxide init zsh)"
+
+# atuin config
+eval "$(atuin init zsh)"
+
+# zsh-autosuggestions
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# zsh-syntax-highlight
+source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+### }}} SOFTWARE CONFIG END
+
+
+### {{{ PAGER CONFIG START
+
+# Set less or more as the default pager.
+if (( ! ${+PAGER} )); then
+  if (( ${+commands[less]} )); then
+    export PAGER=less
+  else
+    export PAGER=more
+  fi
+fi
+
+if (( ! ${+LESS} )); then
+  export LESS='--ignore-case --jump-target=4 --LONG-PROMPT --no-init --quit-if-one-screen --RAW-CONTROL-CHARS'
+fi
+
+### }}} PAGER CONFIG END
+
+
+
+### SNIPPET CONFIG START {{{
+
+alias rm='trash'
+alias cd='z'
+
+# lsd
+if (( ${+commands[lsd]} )); then
+  alias ls=lsd
+  alias lr='ll --tree'    # long format, recursive as a tree
+  alias lx='ll -X'        # long format, sort by extension
+fi
+
+# get
+# order of preference: aria2c, axel, wget, curl. This order is derrived from speed based on personal tests.
+if (( ${+commands[aria2c]} )); then
+  alias get='aria2c --max-connection-per-server=5 --continue'
+elif (( ${+commands[axel]} )); then
+  alias get='axel --num-connections=5 --alternate'
+elif (( ${+commands[wget]} )); then
+  alias get='wget --continue --progress=bar --timestamping'
+elif (( ${+commands[curl]} )); then
+  alias get='curl --continue-at - --location --progress-bar --remote-name --remote-time'
+fi
+
+# Homebrew
+alias brewa='brew autoremove'
+alias brewc='brew cleanup'
+alias brewC='brew cleanup -s'
+alias brewd='brew doctor --verbose'
+alias brewe='brew edit --formula'
+alias brewi='brew info --formula'
+alias brewI='brew install --formula'
+alias brewl='brew list --formula'
+alias brewL='brew leaves'
+alias brewo='brew outdated --formula'
+alias brewr='brew reinstall --formula'
+alias brews='brew search --formula'
+alias brewS='brew services'
+alias brewu='brew update'
+alias brewU='brew upgrade --formula'
+alias brewx='brew uninstall --formula'
+alias brewX='brew uninstall --formula --force'
+
+# Casks do not work on Linux
+if [[ ${OSTYPE} == darwin* ]]; then
+  alias caske='brew edit --cask'
+  alias caski='brew info --cask'
+  alias caskI='brew install --cask'
+  alias caskl='brew list --cask'
+  alias casko='brew outdated --cask'
+  alias caskr='brew reinstall --cask'
+  alias casks='brew search --cask'
+  alias caskU='brew upgrade --cask'
+  alias caskx='brew uninstall --cask'
+  alias caskX='brew uninstall --cask --force'
+  alias caskz='brew uninstall --cask --zap'
+fi
+
+
+### }}} SNIPPET CONFIG END
+
+
+
+### FUNCTION CONFIG START {{{
+
+function proxy_on() {
+  export https_proxy=http://127.0.0.1:7890
+  export http_proxy=http://127.0.0.1:7890
+  export all_proxy=socket5://127.0.0.1:7890
+}
+
+function proxy_off() {
+  export https_proxy
+  export http_proxy
+  export all_proxy
+}
+
+function mkcd() {
+  [[ -n ${1} ]] && mkdir -p ${1} && builtin cd ${1}
+}
+
+### }}} FUNCTION CONFIG END
